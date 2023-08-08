@@ -16,10 +16,12 @@ Code steps are:
 6. Increment counter
 """
 
+import os
+
 
 def create_chapter(text: str, index: int) -> tuple:
     text = text.translate(str.maketrans({"(": "", ")": ""}))
-    timestamp, sep, chapter_title = text.partition(" ")
+    timestamp, _, chapter_title = text.partition(" ")
     chapter_number = format(index, "02d")
 
     # timestamp = format(timestamp, "0^9s")
@@ -35,19 +37,36 @@ def create_chapter(text: str, index: int) -> tuple:
     return line1, line2
 
 
-file_path = "C:\\Users\\iagbarakwe\\Downloads\\chapters.txt"
-new_chapters_file_path = "C:\\Users\\iagbarakwe\\Downloads\\processed_chapters.txt"
+def open_file(file_name: str) -> str:
+    """Opens a supplied file and returns its text"""
 
-with open(file=file_path) as fopen, open(file=new_chapters_file_path, mode="w") as fwrite:
-    lines = fopen.readlines()
+    if os.path.exists(file_name):
+        with open(file_name, mode="r") as fopen:
+            contents = "".join(fopen.readlines())
 
-    new_lines = []
-    for idx, line in enumerate(lines):
-        new_lines.extend(create_chapter(line, idx+1))
-    new_lines.append("\n")
+    else:
+        return f"Error: No such file\n{file_name}\nexists"
+    return contents
 
-    fwrite.writelines(new_lines)
-    print("Finished processing chapters")
 
-# else:
-#     print("Error processing chapters")
+def process_file(file_path: str, new_file_path: str) -> str:
+    """Open source and destination files and process accordingly"""
+
+    # Check that the source file exists
+    if not os.path.exists(file_path):
+        return f"Error: Source file \n{file_path}\ndoes not exist"
+
+    # Ensure both files are not the same
+    if file_path == new_file_path:
+        return f"Error: Source file cannot be same as the destination file"
+
+    with open(file=file_path, mode="r") as fopen, open(file=new_file_path, mode="w") as fwrite:
+        lines = fopen.readlines()
+
+        new_lines = []
+        for idx, line in enumerate(lines):
+            new_lines.extend(create_chapter(line, idx+1))
+        new_lines.append("\n")
+
+        fwrite.writelines(new_lines)
+        return f"Success: Finished processing chapters"
